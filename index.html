@@ -125,6 +125,14 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding-top:6px}
   <span class="pill" id="contador">0 notas no teste</span>
 </header>
 
+<!-- Vindo do atalho do iPhone -->
+<section class="card hidden" id="cardAtalho" aria-labelledby="tA">
+  <h2 id="tA">Nota copiada pelo atalho</h2>
+  <p class="hint">Toque no botão abaixo e, se o iPhone perguntar, toque em “Colar”.</p>
+  <button class="btn btn-primary" id="colarAtalho" type="button">Colar nota do atalho</button>
+  <div class="msg" id="msgAtalho" role="status"></div>
+</section>
+
 <!-- 1. QR -->
 <section class="card" aria-labelledby="t1">
   <h2 id="t1"><span class="step">1</span>Ler o QR code do cupom</h2>
@@ -893,6 +901,35 @@ $("#limpar").addEventListener("click", () => {
 });
 
 carregar(); renderTeste();
+
+// Aberta pelo atalho do iPhone (?colar=1): a página da nota está na área de transferência
+if (new URLSearchParams(location.search).has("colar")){
+  $("#cardAtalho").classList.remove("hidden");
+  history.replaceState(null, "", location.pathname);
+}
+$("#colarAtalho").addEventListener("click", async () => {
+  const msg = $("#msgAtalho");
+  let t = "";
+  try { t = await navigator.clipboard.readText(); }
+  catch (e) {
+    mostrar(msg, "warn", "Não consegui ler a área de transferência. Segure o dedo no campo do passo 2 e toque em “Colar”.");
+    $("#texto").focus();
+    return;
+  }
+  if (!t || !t.trim()){ mostrar(msg, "warn", "A área de transferência está vazia. Rode o atalho de novo na página da nota, depois de tocar em “Visualizar”."); return; }
+  const n = /<\s*(html|table|body|div)\b/i.test(t) ? lerHtml(t, "atalho do iPhone") : lerTexto(t, "atalho do iPhone");
+  if (!n.itens.length && /cf-turnstile|g-recaptcha/i.test(t)){
+    mostrar(msg, "warn", "O atalho rodou antes de os itens aparecerem. Na página da SEFAZ, faça a verificação, toque em “Visualizar” e só então rode o atalho.");
+    return;
+  }
+  msg.className = "msg";
+  $("#cardAtalho").classList.add("hidden");
+  aposLeitura(n);
+  if (!n.itens.length){
+    ultimaPagina = t;
+    $("#baixarPagina").classList.remove("hidden");
+  }
+});
 </script>
 </body>
 </html>
