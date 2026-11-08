@@ -481,6 +481,11 @@ async function buscarNota(link){
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.html) throw new Error(j.erro || ("resposta " + r.status));
     ultimaPagina = j.html;
+    if (/cf-turnstile|g-recaptcha|hcaptcha/i.test(j.html) && !/id=["']tabResult/i.test(j.html)){
+      mostrar(msgQR, "warn", "A SEFAZ deste estado exige uma verificação humana antes de mostrar os itens, então a busca automática não é possível. Toque em “Abrir nota na SEFAZ”, faça a verificação, toque em “Visualizar” e copie o conteúdo para o passo 2.");
+      $("#msgItens").className = "msg";
+      return;
+    }
     const n = lerHtml(j.html, "consulta automática");
     if (n.itens.length){
       mostrar(msgQR, "ok", "Nota buscada automaticamente na SEFAZ.");
