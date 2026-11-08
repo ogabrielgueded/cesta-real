@@ -12,7 +12,7 @@
   --bg:#F3F5F1; --card:#FFFFFF; --ink:#16211C; --muted:#5B6660; --line:#E1E6DF; --soft:#EEF1EC;
   --brand:#1F7A4D; --brand-ink:#155C39; --brand-soft:#E3F2E9; --on-brand:#FFFFFF;
   --warn:#A34A00; --warn-soft:#FFF3E6; --bad:#B42318; --bad-soft:#FDECEA;
-  --c-nat:#1F5C3A; --c-ing:#5E9677; --c-proc:#A9D1B8; --c-ultra:#D9741A; --c-nc:#C9CFC7;
+  --c-nat:#1F5C3A; --c-ing:#5E9677; --c-proc:#A9D1B8; --c-ultra:#D9741A; --c-out:#8A94A6; --c-nc:#C9CFC7;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
@@ -20,7 +20,7 @@
     --bg:#0F1512; --card:#18211C; --ink:#E7EDE9; --muted:#A3B0A8; --line:#2A352F; --soft:#222C26;
     --brand:#3FA36E; --brand-ink:#7FD3A5; --brand-soft:#1C3328; --on-brand:#0B1410;
     --warn:#F2A65A; --warn-soft:#3A2A18; --bad:#F2877D; --bad-soft:#3A1D1A;
-    --c-nat:#7FD3A5; --c-ing:#4E9A73; --c-proc:#2F5C45; --c-ultra:#F08A2E; --c-nc:#4A554E;
+    --c-nat:#7FD3A5; --c-ing:#4E9A73; --c-proc:#2F5C45; --c-ultra:#F08A2E; --c-out:#6B7486; --c-nc:#4A554E;
     color-scheme: dark;
   }
 }
@@ -100,6 +100,7 @@ tr:last-child td{border-bottom:0}
 .chip.proc{background:var(--soft);color:var(--brand-ink)}
 .chip.ultra{background:var(--warn-soft);color:var(--warn)}
 .chip.nc{background:var(--soft);color:var(--muted)}
+.chip.outro{background:var(--soft);color:var(--muted);font-style:italic}
 .chip.gtin{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
 .nota{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .nota:last-child{border-bottom:0}
@@ -293,9 +294,10 @@ const ufDe = (ch) => ch && ch.length === 44 ? (UF[ch.slice(0, 2)] || "") : "";
 // Classificação preliminar inspirada na NOVA (grau de processamento).
 // Ordem importa: exceções de ultraprocessado são checadas antes do resto.
 const REGRAS = [
-  ["ultra", /\b(REFRIG|REFRI\b|REFRIGERANTE|COLA\b|GUARANA|BISC.*RECH|RECHEAD|WAFER|SALGADINHO|SALG\b|CHIPS|SALSICHA|MORTADELA|PRESUNTO|APRESUNTADO|SALAME|PEITO PERU|BLANQUET|NUGGET|EMPANAD|STEAK|HAMBURG|LINGUICA|MIOJO|LAMEN|MAC.*INST|INSTANTANE|SUCO.*PO|REFRESCO|PO P\/? ?SUCO|ACHOC|ACHOCOLATADO|BEB.*LACT|LEITE FERM|IOG.*(MORANGO|SABOR|POLPA|BATIDO|GREGO SAB)|PETIT SUISSE|SORVETE|PICOLE|CHOCOLATE|CHOC\b|BOMBOM|BALA\b|PIRULITO|GOMA|CHICLETE|MARGARINA|CEREAL MAT|SNACK|PAO.*FORMA|PAO FORMA|PAO HOT|BISNAGUINHA|BOLO PRONTO|BOLINHO|CATCHUP|KETCHUP|MAIONESE|MOSTARDA|TEMPERO|CALDO|SAZON|LASANHA|PIZZA|CONGELAD|PRATO PRONTO|ENERGETICO|ISOTONICO|CHA PRONTO|NECTAR|SUCO PRONTO|BEBIDA|CREME AVELA|CREME DE LEITE|LEITE COND|BATATA PALHA|TORRADA|CRACKER|BISC|BISCOITO|COOKIE)/],
-  ["proc", /\b(QUEIJO|MUSSARELA|MUCARELA|PRATO\b|PARMESAO|REQUEIJAO|PAO FR|PAO FRANCES|PAO SAL|PAO DE QUEIJO|SARDINHA|ATUM|EXTRATO|POLPA TOM|MOLHO TOM|MILHO VERDE|ERVILHA|SELETA|PALMITO|AZEITONA|CARNE SECA|CHARQUE|BACON|PICLES|CONSERVA|GELEIA|DOCE DE LEITE|GOIABADA)/],
-  ["ing", /\b(ACUCAR|ACUC\b|SAL\b|SAL REF|OLEO|AZEITE|MANTEIGA|BANHA|VINAGRE|MEL\b|AMIDO|FERMENTO)/],
+  ["outro", /\b(CARVAO|DETERG|SABAO|SABONETE|PAPEL|AMACIANTE|DESINF|ALVEJANTE|AGUA SANIT|ESPONJA|SACO LIXO|SACO P\/? ?LIXO|SHAMPOO|CONDICION|CREME DENT|ESCOVA|FRALDA|ABSORV|PILHA|LAMPADA|FOSFORO|ACENDEDOR|GUARDANAPO|PAPEL ALUM|FILME PVC|RACAO|LIMPADOR|LUSTRA|INSETIC|REPELENTE|VELA\b|DESODOR)/],
+  ["ultra", /\b(RED BULL|MONSTER|TORRAD|REFRIG|REFRI\b|REFRIGERANTE|COLA\b|GUARANA|BISC.*RECH|RECHEAD|WAFER|SALGADINHO|SALG\b|CHIPS|SALSICHA|MORTADELA|PRESUNTO|APRESUNTADO|SALAME|PEITO PERU|BLANQUET|NUGGET|EMPANAD|STEAK|HAMBURG|LINGUICA|MIOJO|LAMEN|MAC.*INST|INSTANTANE|SUCO.*PO|REFRESCO|PO P\/? ?SUCO|ACHOC|ACHOCOLATADO|BEB.*LACT|LEITE FERM|IOG.*(MORANGO|SABOR|POLPA|BATIDO|GREGO SAB)|PETIT SUISSE|SORVETE|PICOLE|CHOCOLATE|CHOC\b|BOMBOM|BALA\b|PIRULITO|GOMA|CHICLETE|MARGARINA|CEREAL MAT|SNACK|PAO.*FORMA|PAO FORMA|PAO HOT|BISNAGUINHA|BOLO PRONTO|BOLINHO|CATCHUP|KETCHUP|MAIONESE|MOSTARDA|TEMPERO|CALDO|SAZON|LASANHA|PIZZA|CONGELAD|PRATO PRONTO|ENERGETICO|ISOTONICO|CHA PRONTO|NECTAR|SUCO PRONTO|BEBIDA|CREME AVELA|CREME DE LEITE|LEITE COND|BATATA PALHA|CRACKER|BISC|BISCOITO|COOKIE)/],
+  ["proc", /\b(VINHO|CERVEJA|ESPUMANTE|QUEIJO|MUSSARELA|MUCARELA|PRATO\b|PARMESAO|REQUEIJAO|PAO FR|PAO FRANCES|PAO SAL|PAO DE QUEIJO|SARDINHA|ATUM|EXTRATO|POLPA TOM|MOLHO TOM|MILHO VERDE|ERVILHA|SELETA|PALMITO|AZEITONA|CARNE SECA|CHARQUE|BACON|PICLES|CONSERVA|GELEIA|DOCE DE LEITE|GOIABADA)/],
+  ["ing", /\b(ACUCAR|ACUC\b|SAL\b|SAL REF|OLEO|AZEITE|MANTEIG|BANHA|VINAGRE|MEL\b|AMIDO|FERMENTO)/],
   ["nat", /\b(ARROZ|FEIJAO|FEIJ\b|LENTILHA|GRAO DE BICO|OVO|OVOS|LEITE|IOG.*NAT|IOGURTE NATURAL|CAFE|FARINHA|FUBA|AVEIA|MACARRAO|ESPAGUETE|PENNE|PARAFUSO|FRANGO|COXA|SOBRECOXA|PEITO FRANGO|CARNE|BOV|PATINHO|ACEM|ALCATRA|MUSCULO|COSTELA|PERNIL|LOMBO|SUINO|PEIXE|TILAPIA|FILE|BANANA|MACA\b|LARANJA|LIMAO|MAMAO|ABACAXI|MELANCIA|MELAO|UVA|PERA|MANGA|GOIABA|MORANGO|ABACATE|TOMATE|ALFACE|RUCULA|COUVE|REPOLHO|BROCOLIS|COUVE FLOR|ESPINAFRE|AGRIAO|BATATA|CEBOLA|ALHO|CENOURA|BETERRABA|MANDIOCA|AIPIM|INHAME|ABOBORA|ABOBRINHA|CHUCHU|PEPINO|PIMENTAO|QUIABO|JILO|VAGEM|MILHO\b|CHEIRO VERDE|SALSA|CEBOLINHA|HORTIFRUTI|FLV|AGUA MIN|AGUA S\/? ?GAS|AGUA C\/? ?GAS|CASTANHA|AMENDOIM|FRUTA|VERDURA|LEGUME)/],
 ];
 const GRUPOS = {
@@ -303,6 +305,7 @@ const GRUPOS = {
   ing:   {nome:"Ingrediente culinário", cor:"var(--c-ing)"},
   proc:  {nome:"Processado", cor:"var(--c-proc)"},
   ultra: {nome:"Ultraprocessado", cor:"var(--c-ultra)"},
+  outro: {nome:"Não alimento", cor:"var(--c-out)"},
   nc:    {nome:"Não classificado", cor:"var(--c-nc)"},
 };
 function classificar(desc){
@@ -316,12 +319,18 @@ function cabecalho(texto, nota){
   const t = texto.replace(/ /g, " ");
   const plano = t.replace(/\s+/g, " ");
   let m = plano.match(RE_CNPJ); if (m) nota.cnpj = m[0];
+  if (!nota.cnpj){ m = plano.match(/CNPJ:?\s*(\d{14})\b/); if (m) nota.cnpj = m[1].replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"); }
   m = plano.match(/Emiss[ãa]o:?\s*(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/i)
    || plano.match(/(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/);
   if (m) nota.emissao = [m[1], m[2]].filter(Boolean).join(" ");
   m = plano.match(new RegExp("Valor\\s+a\\s+pagar\\s*R?\\$?:?\\s*(" + MONEY + ")", "i"))
    || plano.match(new RegExp("Valor\\s+total\\s*R?\\$?:?\\s*(" + MONEY + ")", "i"));
   if (m) nota.total = numBR(m[1]);
+  if (nota.total == null){ m = plano.match(/Valor\s+total\s+R\$\s+(\d+\.\d{2})(?!\d)/i); if (m) nota.total = parseFloat(m[1]); }
+  if (!nota.chave){
+    const ca = plano.match(/Chave\s+de\s+acesso:?\s*([\d\s.\-\/]{44,90})/i);
+    if (ca){ const d = ca[1].replace(/\D/g, ""); if (d.length >= 44) nota.chave = d.slice(0, 44); }
+  }
   if (!nota.chave){
     const mm = plano.match(/(?:\d{4}\s?){10}\d{4}/);
     if (mm) { const c = mm[0].replace(/\s/g, ""); if (c.length === 44) nota.chave = c; }
@@ -384,6 +393,44 @@ function itensTextoGenerico(t){
   return itens;
 }
 
+// Layout da SEFAZ de MG: tbody#myTable, uma linha por item, sem valor unitário
+function qtdBR(s){
+  const m = String(s || "").match(/\d+(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(",", ".")) : null;
+}
+function itensHtmlMG(doc){
+  const itens = [];
+  doc.querySelectorAll("#myTable tr").forEach((tr) => {
+    const tds = [...tr.querySelectorAll("td")];
+    if (tds.length < 3) return;
+    const tx = (el) => (el?.textContent || "").replace(/\s+/g, " ").trim();
+    const primeira = tx(tds[0]);
+    const desc = tx(tds[0].querySelector("h7")) || primeira.replace(/\(C[óo]digo.*$/i, "").trim();
+    const cod = (primeira.match(/C[óo]digo:?\s*(\d+)/i) || [])[1] || "";
+    const achar = (re) => { const td = tds.find((t) => re.test(tx(t))); return td ? tx(td) : ""; };
+    const qtd = qtdBR(achar(/Qtde/i).split(":").pop());
+    const un = achar(/^UN\b/i).split(":").pop().trim().toUpperCase();
+    const total = numBR(achar(/Valor\s+total/i).split("R$").pop());
+    if (!desc || total == null) return;
+    itens.push({descricao: desc, codigo: cod, gtin: gtinEm(tr.textContent), qtd, un,
+      unit: qtd ? Math.round(total / qtd * 100) / 100 : null, total});
+  });
+  return itens;
+}
+
+// Mesmo layout de MG, quando colado como texto (Selecionar Tudo + Copiar)
+function itensTextoMG(t){
+  const re = /([^\n\t(]{2,140}?)\s*\(\s*C[óo]digo:?\s*(\d+)\s*\)\s*Qtde\s+total\s+de\s+[íi]tens:?\s*([\d.,]+)\s*UN:?\s*([A-Za-z]{1,4})\s*Valor\s+total\s+R\$:?\s*R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/gi;
+  const itens = [];
+  let m;
+  while ((m = re.exec(t))){
+    const qtd = qtdBR(m[3]), total = numBR(m[5]);
+    itens.push({descricao: m[1].trim(), codigo: m[2], gtin: "", qtd, un: m[4].toUpperCase(),
+      unit: qtd ? Math.round(total / qtd * 100) / 100 : null, total});
+  }
+  return itens;
+}
+
 function itensHtmlNacional(doc){
   const itens = [];
   doc.querySelectorAll("#tabResult tr").forEach((tr) => {
@@ -439,12 +486,14 @@ function lerHtml(html, origem){
   html = maskCPF(html);
   const doc = new DOMParser().parseFromString(html, "text/html");
   const nota = {origem, chave:qr.chave, uf:qr.uf, link:qr.link, loja:"", cnpj:"", emissao:"", total:null, itens:[], leitor:""};
-  const loja = doc.querySelector("#u20, .txtTopo, #conteudo .txtCenter div") || doc.querySelector("h1,h2,h3,h4");
+  const loja = doc.querySelector("#u20, .txtTopo, #conteudo .txtCenter div, thead h4 b, thead h4") || doc.querySelector("h1,h2,h3,h4");
   if (loja) nota.loja = loja.textContent.replace(/\s+/g, " ").trim();
   const texto = htmlParaTexto(html);
   cabecalho(texto, nota);
   const tentativas = [
     ["layout nacional (HTML)", () => itensHtmlNacional(doc)],
+    ["layout MG (HTML)", () => itensHtmlMG(doc)],
+    ["layout MG (texto)", () => itensTextoMG(texto)],
     ["tabela (HTML)", () => itensHtmlTabela(doc)],
     ["layout nacional (texto)", () => itensTextoNacional(texto)],
     ["linhas (texto)", () => itensTextoGenerico(texto)],
@@ -462,6 +511,7 @@ function lerTexto(texto, origem){
   cabecalho(texto, nota);
   let itens = itensTextoNacional(texto);
   nota.leitor = "layout nacional (texto)";
+  if (!itens.length){ itens = itensTextoMG(texto); nota.leitor = "layout MG (texto)"; }
   if (!itens.length){ itens = itensTextoGenerico(texto); nota.leitor = "linhas (texto)"; }
   nota.itens = itens;
   return finalizar(nota);
@@ -683,7 +733,7 @@ function mostrar(el, tipo, txt){ el.className = "msg show " + tipo; el.textConte
 
 /* ------------------------------------------------------------ render */
 function porGrupo(itens){
-  const g = {nat:0, ing:0, proc:0, ultra:0, nc:0};
+  const g = {nat:0, ing:0, proc:0, ultra:0, outro:0, nc:0};
   for (const i of itens) g[i.grupo] += i.total || 0;
   return g;
 }
