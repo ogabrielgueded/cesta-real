@@ -464,7 +464,7 @@ const qr = {link:"", chave:"", uf:""};
 
 // Servidor que busca a nota na SEFAZ (função consulta-nfce no Supabase).
 // Vazio = só o modo manual (copiar e colar).
-const SERVIDOR = {url:"", anonKey:""};
+const SERVIDOR = {url:"https://aqdvwyxigzupxffhdusv.supabase.co/functions/v1/consulta-nfce", anonKey:""};
 let ultimaPagina = "";
 
 async function buscarNota(link){
