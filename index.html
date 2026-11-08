@@ -795,6 +795,12 @@ function aposLeitura(n){
 $("#lerTexto").addEventListener("click", () => {
   const t = $("#texto").value;
   if (!t.trim()) { mostrar($("#msgItens"), "warn", "Cole primeiro o conteúdo da página da nota."); return; }
+  if (/^\s*https?:\/\/\S+\s*$/i.test(t)) {
+    if (!qr.link) definirLink(t.trim());
+    $("#texto").value = "";
+    mostrar($("#msgItens"), "warn", "Aqui vai o conteúdo da página, não o link. Toque em “Abrir nota na SEFAZ”, espere a nota carregar, selecione todo o texto da página, copie e cole neste campo.");
+    return;
+  }
   const n = /<\s*(html|table|body|div)\b/i.test(t) ? lerHtml(t, "texto colado (HTML)") : lerTexto(t, "texto colado");
   $("#texto").value = "";
   aposLeitura(n);
