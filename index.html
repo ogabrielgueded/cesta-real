@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cesta Real · Teste de captura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+<style>
+:root{
+  --bg:#F3F5F1; --card:#FFFFFF; --ink:#16211C; --muted:#5B6660; --line:#E1E6DF; --soft:#EEF1EC;
+  --brand:#1F7A4D; --brand-ink:#155C39; --brand-soft:#E3F2E9; --on-brand:#FFFFFF;
+  --warn:#A34A00; --warn-soft:#FFF3E6; --bad:#B42318; --bad-soft:#FDECEA;
+  --c-nat:#1F5C3A; --c-ing:#5E9677; --c-proc:#A9D1B8; --c-ultra:#D9741A; --c-nc:#C9CFC7;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1512; --card:#18211C; --ink:#E7EDE9; --muted:#A3B0A8; --line:#2A352F; --soft:#222C26;
+    --brand:#3FA36E; --brand-ink:#7FD3A5; --brand-soft:#1C3328; --on-brand:#0B1410;
+    --warn:#F2A65A; --warn-soft:#3A2A18; --bad:#F2877D; --bad-soft:#3A1D1A;
+    --c-nat:#7FD3A5; --c-ing:#4E9A73; --c-proc:#2F5C45; --c-ultra:#F08A2E; --c-nc:#4A554E;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Space Grotesk",Inter,sans-serif;margin:0;letter-spacing:-.2px}
+a{color:var(--brand-ink)}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding-top:4px}
+header h1{font-size:24px;font-weight:700}
+header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.pill{font-size:12px;font-weight:600;color:var(--brand-ink);background:var(--brand-soft);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card h2{font-size:17px;font-weight:600;display:flex;align-items:center;gap:10px}
+.step{width:26px;height:26px;border-radius:13px;background:var(--brand);color:var(--on-brand);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;flex:none}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:0;border-radius:12px;min-height:46px;padding:0 16px;font:600 15px Inter,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-primary{background:var(--brand);color:var(--on-brand)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{background:var(--soft);color:var(--ink)}
+.btn-ghost:hover{filter:brightness(.97)}
+.btn-danger{background:var(--bad-soft);color:var(--bad)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.grow{flex:1 1 180px}
+label.btn input{display:none}
+input[type=url],textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;font:14px Inter,sans-serif}
+textarea{min-height:120px;resize:vertical}
+input:focus-visible,textarea:focus-visible,.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.scanner{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:70vh;width:100%}
+@media (min-width:560px){.scanner{aspect-ratio:4/3}}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mira{position:absolute;left:50%;top:46%;width:62%;max-width:280px;aspect-ratio:1;transform:translate(-50%,-50%);box-shadow:0 0 0 9999px rgba(0,0,0,.45);border-radius:14px}
+.mira i{position:absolute;width:34px;height:34px;border:4px solid #FFFFFF;border-radius:4px}
+.mira i:nth-child(1){left:-2px;top:-2px;border-right:0;border-bottom:0;border-top-left-radius:14px}
+.mira i:nth-child(2){right:-2px;top:-2px;border-left:0;border-bottom:0;border-top-right-radius:14px}
+.mira i:nth-child(3){left:-2px;bottom:-2px;border-right:0;border-top:0;border-bottom-left-radius:14px}
+.mira i:nth-child(4){right:-2px;bottom:-2px;border-left:0;border-top:0;border-bottom-right-radius:14px}
+.laser{position:absolute;left:8%;right:8%;height:2px;background:#5FD394;box-shadow:0 0 10px #5FD394;top:10%;animation:laser 1.8s ease-in-out infinite alternate}
+@keyframes laser{to{top:88%}}
+@media (prefers-reduced-motion:reduce){.laser{animation:none;top:50%}}
+.scanner.achou .mira i{border-color:#5FD394}
+.scan-dica{position:absolute;left:0;right:0;top:12px;margin:0;text-align:center;color:#FFFFFF;font-size:14px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 16px}
+.scan-botoes{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:12px}
+.scan-btn{background:rgba(255,255,255,.18);color:#FFFFFF;backdrop-filter:blur(6px)}
+.scan-btn[aria-pressed="true"]{background:#FFFFFF;color:#16211C}
+.scan-cancelar{background:#FFFFFF;color:#16211C;min-width:120px}
+.qr-info{display:none;background:var(--soft);border-radius:12px;padding:12px;gap:8px;flex-direction:column}
+.qr-info.show{display:flex}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all;color:var(--muted)}
+.msg{display:none;border-radius:12px;padding:10px 12px;font-size:13.5px}
+.msg.show{display:block}
+.msg.ok{background:var(--brand-soft);color:var(--brand-ink)}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.msg.err{background:var(--bad-soft);color:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:560px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{background:var(--soft);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi b{font-family:"Space Grotesk",Inter,sans-serif;font-size:20px;font-weight:600}
+.kpi b.good{color:var(--brand-ink)} .kpi b.warn{color:var(--warn)} .kpi b.bad{color:var(--bad)}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;background:var(--soft)}
+.bar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.table-box{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);background:var(--soft);font-size:12px;white-space:nowrap}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chip.nat{background:var(--brand-soft);color:var(--brand-ink)}
+.chip.ing{background:var(--soft);color:var(--ink)}
+.chip.proc{background:var(--soft);color:var(--brand-ink)}
+.chip.ultra{background:var(--warn-soft);color:var(--warn)}
+.chip.nc{background:var(--soft);color:var(--muted)}
+.chip.gtin{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
+.nota{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.nota:last-child{border-bottom:0}
+.nota div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nota b{font-size:14px}
+.nota small{color:var(--muted);font-size:12.5px}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:0;background:var(--soft);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.hidden{display:none!important}
+details summary{cursor:pointer;color:var(--brand-ink);font-weight:600;font-size:14px;min-height:32px;display:flex;align-items:center}
+details ol{margin:6px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px}
+details li{margin:4px 0}
+footer{color:var(--muted);font-size:12px;text-align:center;padding-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Cesta Real</h1>
+    <p>Teste de captura de NFC-e</p>
+  </div>
+  <span class="pill" id="contador">0 notas no teste</span>
+</header>
+
+<!-- 1. QR -->
+<section class="card" aria-labelledby="t1">
+  <h2 id="t1"><span class="step">1</span>Ler o QR code do cupom</h2>
+  <div class="row" id="scanAcoes">
+    <button class="btn btn-primary grow" id="abrirCamera" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg>
+      Ler QR code com a câmera
+    </button>
+    <label class="btn btn-ghost grow hidden" id="fotoAlternativa">
+      Usar foto do QR code
+      <input type="file" id="foto" accept="image/*" capture="environment">
+    </label>
+  </div>
+  <div class="scanner hidden" id="scanner" aria-live="polite">
+    <video id="video" playsinline muted autoplay aria-label="Imagem da câmera"></video>
+    <div class="mira" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="laser"></span></div>
+    <p class="scan-dica" id="scanDica">Aponte para o QR code no rodapé do cupom</p>
+    <div class="scan-botoes">
+      <button class="icon-btn scan-btn hidden" id="lanterna" type="button" aria-label="Ligar lanterna" aria-pressed="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6l-1 6h-4zM10 8h4v4l-1 10h-2l-1-10z"/></svg>
+      </button>
+      <button class="btn scan-cancelar" id="fecharCamera" type="button">Cancelar</button>
+    </div>
+  </div>
+  <label for="link" class="hint">Ou cole o link do QR code:</label>
+  <div class="row">
+    <input type="url" id="link" class="grow" placeholder="https://… (link do QR code da nota)" inputmode="url" autocomplete="off">
+    <button class="btn btn-ghost" id="usarLink" type="button">Usar link</button>
+  </div>
+  <div class="msg" id="msgQR" role="status"></div>
+  <div class="qr-info" id="qrInfo">
+    <div><b id="qrUf">—</b> · <span class="hint" id="qrChaveCurta"></span></div>
+    <div class="mono" id="qrLink"></div>
+    <a class="btn btn-primary" id="abrirSefaz" href="#" target="_blank" rel="noopener noreferrer">
+      Abrir nota na SEFAZ
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- 2. Itens -->
+<section class="card" aria-labelledby="t2">
+  <h2 id="t2"><span class="step">2</span>Trazer os itens da nota</h2>
+  <p class="hint">Por segurança, o navegador não deixa esta página ler o site da SEFAZ sozinha. Na página da nota, copie todo o conteúdo e cole abaixo, ou salve a página e envie o arquivo.</p>
+  <details>
+    <summary>Como copiar a página da nota</summary>
+    <ol>
+      <li><b>No computador:</b> na página da nota, Ctrl+A e depois Ctrl+C. Volte aqui e cole com Ctrl+V.</li>
+      <li><b>No celular:</b> segure o dedo sobre um texto da nota, toque em “Selecionar tudo” e depois em “Copiar”.</li>
+      <li><b>Arquivo:</b> no computador, Ctrl+S salva a página; envie o arquivo .html aqui.</li>
+    </ol>
+  </details>
+  <label for="texto" class="hint">Conteúdo da página da nota</label>
+  <textarea id="texto" placeholder="Cole aqui o conteúdo copiado da página da nota…"></textarea>
+  <div class="row">
+    <button class="btn btn-primary grow" id="lerTexto" type="button">Ler conteúdo colado</button>
+    <label class="btn btn-ghost grow">
+      Enviar página salva (.html)
+      <input type="file" id="arquivos" accept=".html,.htm,.txt,text/html,text/plain" multiple>
+    </label>
+  </div>
+  <div class="msg" id="msgItens" role="status"></div>
+</section>
+
+<!-- 3. Resultado da nota -->
+<section class="card hidden" id="cardNota" aria-labelledby="t3">
+  <h2 id="t3"><span class="step">3</span><span id="notaTitulo">Resultado da nota</span></h2>
+  <p class="hint" id="notaSub"></p>
+  <div class="kpis" id="notaKpis"></div>
+  <div>
+    <p class="hint" style="margin-bottom:6px">Para onde foi o dinheiro <span id="classAviso">(classificação preliminar por palavras-chave)</span></p>
+    <div class="bar" id="notaBar"></div>
+    <div class="legend" id="notaLegend" style="margin-top:8px"></div>
+  </div>
+  <div class="table-box"><table>
+    <thead><tr><th>Descrição</th><th>Código / GTIN</th><th class="num">Qtd</th><th class="num">Unit.</th><th class="num">Total</th><th>Grupo</th></tr></thead>
+    <tbody id="notaItens"></tbody>
+  </table></div>
+  <div class="row">
+    <button class="btn btn-primary grow" id="salvarNota" type="button">Salvar no teste</button>
+    <button class="btn btn-ghost grow" id="descartarNota" type="button">Descartar</button>
+  </div>
+</section>
+
+<!-- 4. Resultado do teste -->
+<section class="card" aria-labelledby="t4">
+  <h2 id="t4"><span class="step">4</span>Resultado do teste</h2>
+  <div class="kpis" id="testeKpis"></div>
+  <div id="testeBarBox" class="hidden">
+    <p class="hint" style="margin-bottom:6px">Todas as notas, por valor gasto</p>
+    <div class="bar" id="testeBar"></div>
+  </div>
+  <div id="listaNotas"><p class="hint">Nenhuma nota salva ainda. Leia a primeira nota acima.</p></div>
+  <div class="row">
+    <button class="btn btn-ghost grow" id="expCsv" type="button">Exportar itens (CSV)</button>
+    <button class="btn btn-ghost grow" id="expTxt" type="button">Exportar relatório (TXT)</button>
+    <button class="btn btn-danger" id="limpar" type="button">Limpar teste</button>
+  </div>
+</section>
+
+<footer>Os dados ficam só neste aparelho. O CPF que aparece em algumas notas é mascarado antes de qualquer gravação.</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ util */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl = (v) => v == null || isNaN(v) ? "—" : v.toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+const num = (v, d = 3) => v == null || isNaN(v) ? "—" : v.toLocaleString("pt-BR", {maximumFractionDigits:d});
+const pct = (a, b) => b ? Math.round(100 * a / b) + "%" : "—";
+
+const UF = {"11":"RO","12":"AC","13":"AM","14":"RR","15":"PA","16":"AP","17":"TO","21":"MA","22":"PI","23":"CE","24":"RN","25":"PB","26":"PE","27":"AL","28":"SE","29":"BA","31":"MG","32":"ES","33":"RJ","35":"SP","41":"PR","42":"SC","43":"RS","50":"MS","51":"MT","52":"GO","53":"DF"};
+const RE_CPF = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g;
+const RE_CNPJ = /\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/;
+const MONEY = "\\d{1,3}(?:\\.\\d{3})*,\\d{2}";
+const RE_MONEY_G = new RegExp(MONEY, "g");
+
+function numBR(s){
+  if (s == null) return null;
+  const m = String(s).match(/\d+(?:\.\d{3})*(?:,\d+)?|\d+(?:\.\d+)?/);
+  if (!m) return null;
+  let v = m[0];
+  if (v.includes(",")) v = v.replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+const maskCPF = (s) => String(s || "").replace(RE_CPF, "***.***.***-**");
+const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+
+function gtinValido(g){
+  g = String(g || "");
+  if (!/^\d+$/.test(g) || ![8,12,13,14].includes(g.length) || /^0+$/.test(g)) return false;
+  const corpo = g.slice(0, -1).split("").reverse();
+  const soma = corpo.reduce((a, d, i) => a + Number(d) * (i % 2 === 0 ? 3 : 1), 0);
+  return (10 - soma % 10) % 10 === Number(g.slice(-1));
+}
+function gtinEm(s){
+  const m = String(s || "").match(/(?:EAN|GTIN)[^0-9]{0,40}?(\d{8}|\d{12,14})\b/i);
+  return m && gtinValido(m[1]) ? m[1] : "";
+}
+function chaveDe(s){
+  s = String(s || "");
+  try {
+    const u = new URL(s);
+    const p = decodeURIComponent(u.searchParams.get("p") || u.searchParams.get("chNFe") || "");
+    const m = p.match(/\d{44}/);
+    if (m) return m[0];
+  } catch (e) {}
+  const m = s.replace(/[\s.]/g, "").match(/\d{44}/);
+  return m ? m[0] : "";
+}
+const ufDe = (ch) => ch && ch.length === 44 ? (UF[ch.slice(0, 2)] || "") : "";
+
+/* ----------------------------------------------------- classificação */
+// Classificação preliminar inspirada na NOVA (grau de processamento).
+// Ordem importa: exceções de ultraprocessado são checadas antes do resto.
+const REGRAS = [
+  ["ultra", /\b(REFRIG|REFRI\b|REFRIGERANTE|COLA\b|GUARANA|BISC.*RECH|RECHEAD|WAFER|SALGADINHO|SALG\b|CHIPS|SALSICHA|MORTADELA|PRESUNTO|APRESUNTADO|SALAME|PEITO PERU|BLANQUET|NUGGET|EMPANAD|STEAK|HAMBURG|LINGUICA|MIOJO|LAMEN|MAC.*INST|INSTANTANE|SUCO.*PO|REFRESCO|PO P\/? ?SUCO|ACHOC|ACHOCOLATADO|BEB.*LACT|LEITE FERM|IOG.*(MORANGO|SABOR|POLPA|BATIDO|GREGO SAB)|PETIT SUISSE|SORVETE|PICOLE|CHOCOLATE|CHOC\b|BOMBOM|BALA\b|PIRULITO|GOMA|CHICLETE|MARGARINA|CEREAL MAT|SNACK|PAO.*FORMA|PAO FORMA|PAO HOT|BISNAGUINHA|BOLO PRONTO|BOLINHO|CATCHUP|KETCHUP|MAIONESE|MOSTARDA|TEMPERO|CALDO|SAZON|LASANHA|PIZZA|CONGELAD|PRATO PRONTO|ENERGETICO|ISOTONICO|CHA PRONTO|NECTAR|SUCO PRONTO|BEBIDA|CREME AVELA|CREME DE LEITE|LEITE COND|BATATA PALHA|TORRADA|CRACKER|BISC|BISCOITO|COOKIE)/],
+  ["proc", /\b(QUEIJO|MUSSARELA|MUCARELA|PRATO\b|PARMESAO|REQUEIJAO|PAO FR|PAO FRANCES|PAO SAL|PAO DE QUEIJO|SARDINHA|ATUM|EXTRATO|POLPA TOM|MOLHO TOM|MILHO VERDE|ERVILHA|SELETA|PALMITO|AZEITONA|CARNE SECA|CHARQUE|BACON|PICLES|CONSERVA|GELEIA|DOCE DE LEITE|GOIABADA)/],
+  ["ing", /\b(ACUCAR|ACUC\b|SAL\b|SAL REF|OLEO|AZEITE|MANTEIGA|BANHA|VINAGRE|MEL\b|AMIDO|FERMENTO)/],
+  ["nat", /\b(ARROZ|FEIJAO|FEIJ\b|LENTILHA|GRAO DE BICO|OVO|OVOS|LEITE|IOG.*NAT|IOGURTE NATURAL|CAFE|FARINHA|FUBA|AVEIA|MACARRAO|ESPAGUETE|PENNE|PARAFUSO|FRANGO|COXA|SOBRECOXA|PEITO FRANGO|CARNE|BOV|PATINHO|ACEM|ALCATRA|MUSCULO|COSTELA|PERNIL|LOMBO|SUINO|PEIXE|TILAPIA|FILE|BANANA|MACA\b|LARANJA|LIMAO|MAMAO|ABACAXI|MELANCIA|MELAO|UVA|PERA|MANGA|GOIABA|MORANGO|ABACATE|TOMATE|ALFACE|RUCULA|COUVE|REPOLHO|BROCOLIS|COUVE FLOR|ESPINAFRE|AGRIAO|BATATA|CEBOLA|ALHO|CENOURA|BETERRABA|MANDIOCA|AIPIM|INHAME|ABOBORA|ABOBRINHA|CHUCHU|PEPINO|PIMENTAO|QUIABO|JILO|VAGEM|MILHO\b|CHEIRO VERDE|SALSA|CEBOLINHA|HORTIFRUTI|FLV|AGUA MIN|AGUA S\/? ?GAS|AGUA C\/? ?GAS|CASTANHA|AMENDOIM|FRUTA|VERDURA|LEGUME)/],
+];
+const GRUPOS = {
+  nat:   {nome:"Natural ou pouco processado", cor:"var(--c-nat)"},
+  ing:   {nome:"Ingrediente culinário", cor:"var(--c-ing)"},
+  proc:  {nome:"Processado", cor:"var(--c-proc)"},
+  ultra: {nome:"Ultraprocessado", cor:"var(--c-ultra)"},
+  nc:    {nome:"Não classificado", cor:"var(--c-nc)"},
+};
+function classificar(desc){
+  const d = " " + norm(desc).replace(/[^A-Z0-9\/ ]/g, " ").replace(/\s+/g, " ") + " ";
+  for (const [g, re] of REGRAS) if (re.test(d)) return g;
+  return "nc";
+}
+
+/* ----------------------------------------------------------- leitura */
+function cabecalho(texto, nota){
+  const t = texto.replace(/ /g, " ");
+  const plano = t.replace(/\s+/g, " ");
+  let m = plano.match(RE_CNPJ); if (m) nota.cnpj = m[0];
+  m = plano.match(/Emiss[ãa]o:?\s*(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/i)
+   || plano.match(/(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/);
+  if (m) nota.emissao = [m[1], m[2]].filter(Boolean).join(" ");
+  m = plano.match(new RegExp("Valor\\s+a\\s+pagar\\s*R?\\$?:?\\s*(" + MONEY + ")", "i"))
+   || plano.match(new RegExp("Valor\\s+total\\s*R?\\$?:?\\s*(" + MONEY + ")", "i"));
+  if (m) nota.total = numBR(m[1]);
+  if (!nota.chave){
+    const mm = plano.match(/(?:\d{4}\s?){10}\d{4}/);
+    if (mm) { const c = mm[0].replace(/\s/g, ""); if (c.length === 44) nota.chave = c; }
+  }
+  if (!nota.loja){
+    const linhas = t.split(/\n/).map((l) => l.trim()).filter(Boolean);
+    const ignorar = /consulta|nfc-?e|documento auxiliar|nota fiscal|secretaria|fazenda|portal|^cnpj|^ie\b|inscri|vers[aã]o|imprimir|^r\$/i;
+    const l = linhas.find((x) => /[A-Za-zÀ-ú]{3,}/.test(x) && !ignorar.test(x) && x.length < 90);
+    if (l) nota.loja = l;
+  }
+}
+
+function itensTextoNacional(t){
+  const re = /([^\n(]{2,140}?)\s*\(\s*C[óo]d(?:igo)?\.?\s*:?\s*([0-9A-Za-z.\-]+)\s*\)([\s\S]{0,260}?)Vl\.?\s*Total\s*:?\s*R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/gi;
+  const itens = [];
+  let m;
+  while ((m = re.exec(t))){
+    const meio = m[3];
+    const q = meio.match(/Qtde?\.?\s*:?\s*([\d.,]+)/i);
+    const u = meio.match(/\bUN\s*:?\s*([A-Za-z]{1,4})\b/);
+    const vu = meio.match(/Vl\.?\s*Unit\.?\s*:?\s*R?\$?\s*([\d.,]+)/i);
+    itens.push({
+      descricao: m[1].replace(/^\s*\d{1,3}\s+(?=\S)/, "").trim(),
+      codigo: m[2].replace(/[.\-]/g, ""),
+      gtin: gtinEm(meio),
+      qtd: q ? numBR(q[1]) : null,
+      un: u ? u[1].toUpperCase() : "",
+      unit: vu ? numBR(vu[1]) : null,
+      total: numBR(m[4]),
+    });
+  }
+  return itens;
+}
+
+const NAO_ITEM = /total|subtotal|desconto|troco|pagamento|pago|tributo|valor a pagar|forma de|cart[aã]o|cr[eé]dito|d[eé]bito|dinheiro|\bpix\b|acr[eé]scimo|qtd\.? total|informa[cç][aã]o|^descri[cç][aã]o/i;
+function itensTextoGenerico(t){
+  const itens = [];
+  for (const linha of t.split(/\n/)){
+    const l = linha.replace(/ /g, " ").trim();
+    if (!l || NAO_ITEM.test(l)) continue;
+    const valores = l.match(RE_MONEY_G);
+    if (!valores || !/[A-Za-zÀ-ú]{3,}/.test(l)) continue;
+    const celulas = l.split(/\t|\s{2,}|\s\|\s/).map((c) => c.trim()).filter(Boolean);
+    let desc = celulas.find((c) => /[A-Za-zÀ-ú]{3,}/.test(c) && !/^(Qtde?|UN|Vl)\b/i.test(c)) || "";
+    if (celulas.length === 1) desc = l.replace(RE_MONEY_G, "").replace(/\s+[\d.,]+\s*(UN|KG|PCT|CX|LT|L|G)?\s*$/i, "").trim();
+    if (!desc) continue;
+    const q = l.match(/Qtde?\.?\s*:?\s*([\d.,]+)/i) || celulas.slice(1).join(" ").match(/(?:^|\s)(\d+(?:,\d{1,3})?)(?=\s+(?:UN|KG|PCT|CX|LT|L|G|FD|DZ)\b)/i);
+    const u = l.match(/\bUN\s*:?\s*([A-Za-z]{1,4})\b/) || l.match(/\s(KG|PCT|CX|LT|FD|DZ|UN)\s/i);
+    const cod = l.match(/C[óo]d(?:igo)?\.?:?\s*(\d+)/i);
+    itens.push({
+      descricao: desc.replace(/\(C[óo]digo.*?\)/i, "").trim(),
+      codigo: cod ? cod[1] : "",
+      gtin: gtinEm(l),
+      qtd: q ? numBR(q[1]) : null,
+      un: u ? u[1].toUpperCase() : "",
+      unit: valores.length > 1 ? numBR(valores[valores.length - 2]) : null,
+      total: numBR(valores[valores.length - 1]),
+    });
+  }
+  return itens;
+}
+
+function itensHtmlNacional(doc){
+  const itens = [];
+  doc.querySelectorAll("#tabResult tr").forEach((tr) => {
+    const nome = tr.querySelector(".txtTit");
+    if (!nome) return;
+    const tx = (sel) => (tr.querySelector(sel)?.textContent || "").replace(/\s+/g, " ").trim();
+    const after = (s) => s.split(":").pop().trim();
+    const cod = (tx(".RCod").match(/\d+/) || [""])[0];
+    itens.push({
+      descricao: nome.textContent.replace(/\s+/g, " ").trim(),
+      codigo: cod,
+      gtin: gtinEm(tr.textContent),
+      qtd: numBR(after(tx(".Rqtd"))),
+      un: after(tx(".RUN")).toUpperCase(),
+      unit: numBR(after(tx(".RvlUnit"))),
+      total: numBR(tx(".valor")),
+    });
+  });
+  return itens;
+}
+
+function itensHtmlTabela(doc){
+  let melhor = null, qtdMelhor = 0;
+  doc.querySelectorAll("table").forEach((tb) => {
+    const q = [...tb.querySelectorAll("tr")].filter((tr) => new RegExp(MONEY).test(tr.textContent)).length;
+    if (q > qtdMelhor){ melhor = tb; qtdMelhor = q; }
+  });
+  if (!melhor) return [];
+  const linhas = [...melhor.querySelectorAll("tr")].map((tr) =>
+    [...tr.querySelectorAll("td,th")].map((c) => c.textContent.replace(/\s+/g, " ").trim()).join("\t"));
+  return itensTextoGenerico(linhas.join("\n"));
+}
+
+function htmlParaTexto(html){
+  const marcado = html.replace(/<(br|\/tr|\/p|\/div|\/li|\/h\d|\/table|\/span class="valor")[^>]*>/gi, "$&\n").replace(/<\/t[dh]>/gi, "$&\t");
+  const doc = new DOMParser().parseFromString(marcado, "text/html");
+  doc.querySelectorAll("script,style,noscript").forEach((n) => n.remove());
+  return (doc.body?.textContent || "").replace(/[ \t]*\n[ \t]*/g, "\n").replace(/\n{2,}/g, "\n");
+}
+
+function finalizar(nota){
+  nota.itens = nota.itens.filter((i) => i.descricao && i.total != null);
+  for (const it of nota.itens){
+    if (!it.gtin && gtinValido(it.codigo)) it.gtin = it.codigo;
+    it.grupo = classificar(it.descricao);
+  }
+  nota.uf = nota.uf || ufDe(nota.chave);
+  nota.soma = nota.itens.reduce((a, i) => a + (i.total || 0), 0);
+  return nota;
+}
+
+function lerHtml(html, origem){
+  html = maskCPF(html);
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const nota = {origem, chave:qr.chave, uf:qr.uf, link:qr.link, loja:"", cnpj:"", emissao:"", total:null, itens:[], leitor:""};
+  const loja = doc.querySelector("#u20, .txtTopo, #conteudo .txtCenter div") || doc.querySelector("h1,h2,h3,h4");
+  if (loja) nota.loja = loja.textContent.replace(/\s+/g, " ").trim();
+  const texto = htmlParaTexto(html);
+  cabecalho(texto, nota);
+  const tentativas = [
+    ["layout nacional (HTML)", () => itensHtmlNacional(doc)],
+    ["tabela (HTML)", () => itensHtmlTabela(doc)],
+    ["layout nacional (texto)", () => itensTextoNacional(texto)],
+    ["linhas (texto)", () => itensTextoGenerico(texto)],
+  ];
+  for (const [nome, f] of tentativas){
+    const itens = f();
+    if (itens.length){ nota.itens = itens; nota.leitor = nome; break; }
+  }
+  return finalizar(nota);
+}
+
+function lerTexto(texto, origem){
+  texto = maskCPF(texto).replace(/\r/g, "");
+  const nota = {origem, chave:qr.chave, uf:qr.uf, link:qr.link, loja:"", cnpj:"", emissao:"", total:null, itens:[], leitor:""};
+  cabecalho(texto, nota);
+  let itens = itensTextoNacional(texto);
+  nota.leitor = "layout nacional (texto)";
+  if (!itens.length){ itens = itensTextoGenerico(texto); nota.leitor = "linhas (texto)"; }
+  nota.itens = itens;
+  return finalizar(nota);
+}
+
+/* ---------------------------------------------------------------- QR */
+const qr = {link:"", chave:"", uf:""};
+
+function definirLink(link){
+  link = String(link || "").trim();
+  const m = $("#msgQR");
+  if (!/^https?:\/\//i.test(link)){
+    mostrar(m, "err", "Isso não parece um link de nota. Confira e tente de novo.");
+    return;
+  }
+  qr.link = link; qr.chave = chaveDe(link); qr.uf = ufDe(qr.chave);
+  $("#qrUf").textContent = qr.uf ? "Nota de " + qr.uf : "UF não identificada";
+  $("#qrChaveCurta").textContent = qr.chave ? "chave …" + qr.chave.slice(-8) : "chave não encontrada no link";
+  $("#qrLink").textContent = link;
+  $("#abrirSefaz").href = link;
+  $("#qrInfo").classList.add("show");
+  mostrar(m, "ok", "QR code lido. Abra a nota na SEFAZ e traga os itens no passo 2.");
+}
+
+async function decodificarFoto(file){
+  const img = await createImageBitmap(file);
+  if ("BarcodeDetector" in window){
+    try {
+      const det = new BarcodeDetector({formats:["qr_code"]});
+      const r = await det.detect(img);
+      if (r.length) return r[0].rawValue;
+    } catch (e) {}
+  }
+  if (!window.jsQR) throw new Error("leitor de QR indisponível (sem internet?). Cole o link manualmente.");
+  for (const lado of [1600, 1000, 700]){
+    const f = Math.min(1, lado / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.width * f); c.height = Math.round(img.height * f);
+    const ctx = c.getContext("2d", {willReadFrequently:true});
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    const d = ctx.getImageData(0, 0, c.width, c.height);
+    const r = window.jsQR(d.data, c.width, c.height, {inversionAttempts:"attemptBoth"});
+    if (r && r.data) return r.data;
+  }
+  return "";
+}
+
+/* ------------------------------------------------- leitura ao vivo */
+const scan = {stream:null, track:null, timer:null, ocupado:false, detector:null, canvas:null, lanterna:false};
+
+const EMBUTIDA = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+
+function erroCamera(e){
+  if (EMBUTIDA && (!e || e.name === "NotAllowedError" || e.name === "SecurityError"))
+    return "Dentro do app do Claude a câmera ao vivo não é liberada para páginas publicadas. Use “Usar foto do QR code”, que abre a câmera do celular, ou a versão hospedada em https (GitHub Pages).";
+  if (!window.isSecureContext) return "A câmera só abre em endereço seguro (https), como o GitHub Pages, ou em localhost. Aberto direto do arquivo, use a foto ou cole o link.";
+  const n = e && e.name;
+  if (n === "NotAllowedError" || n === "SecurityError") return "Permissão da câmera negada. Libere a câmera para esta página nas configurações do navegador e tente de novo.";
+  if (n === "NotFoundError" || n === "OverconstrainedError") return "Nenhuma câmera encontrada neste aparelho.";
+  if (n === "NotReadableError") return "A câmera está em uso por outro aplicativo. Feche-o e tente de novo.";
+  return "Não foi possível abrir a câmera" + (e && e.message ? ": " + e.message : ".");
+}
+
+async function abrirCamera(){
+  const msg = $("#msgQR");
+  if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext){
+    mostrar(msg, "warn", erroCamera());
+    $("#fotoAlternativa").classList.remove("hidden");
+    return;
+  }
+  try {
+    scan.stream = await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:720}},
+    });
+  } catch (e) {
+    mostrar(msg, "err", erroCamera(e));
+    $("#fotoAlternativa").classList.remove("hidden");
+    return;
+  }
+  scan.track = scan.stream.getVideoTracks()[0];
+  const video = $("#video");
+  video.srcObject = scan.stream;
+  $("#scanner").classList.remove("hidden", "achou");
+  $("#scanAcoes").classList.add("hidden");
+  $("#scanDica").textContent = "Aponte para o QR code no rodapé do cupom";
+  msg.className = "msg";
+  try { await video.play(); } catch (e) {}
+
+  // Lanterna, quando o aparelho permite
+  try {
+    const cap = scan.track.getCapabilities ? scan.track.getCapabilities() : {};
+    $("#lanterna").classList.toggle("hidden", !cap.torch);
+  } catch (e) { $("#lanterna").classList.add("hidden"); }
+
+  scan.detector = null;
+  if ("BarcodeDetector" in window){
+    try {
+      const fmts = await BarcodeDetector.getSupportedFormats();
+      if (fmts.includes("qr_code")) scan.detector = new BarcodeDetector({formats:["qr_code"]});
+    } catch (e) {}
+  }
+  if (!scan.detector && !window.jsQR){
+    fecharCamera();
+    mostrar(msg, "err", "O leitor de QR não carregou (sem internet?). Cole o link manualmente.");
+    return;
+  }
+  scan.canvas = scan.canvas || document.createElement("canvas");
+  scan.timer = setInterval(lerQuadro, 160);
+}
+
+async function lerQuadro(){
+  const video = $("#video");
+  if (scan.ocupado || !scan.stream || video.readyState < 2 || !video.videoWidth) return;
+  scan.ocupado = true;
+  try {
+    let valor = "";
+    if (scan.detector){
+      const r = await scan.detector.detect(video);
+      if (r.length) valor = r[0].rawValue;
+    } else {
+      // Recorta o centro (onde fica a mira) e reduz para ganhar velocidade
+      const vw = video.videoWidth, vh = video.videoHeight;
+      const lado = Math.min(vw, vh) * 0.8;
+      const sx = (vw - lado) / 2, sy = (vh - lado) / 2;
+      const alvo = Math.min(640, lado);
+      const c = scan.canvas; c.width = c.height = alvo;
+      const ctx = c.getContext("2d", {willReadFrequently:true});
+      ctx.drawImage(video, sx, sy, lado, lado, 0, 0, alvo, alvo);
+      const d = ctx.getImageData(0, 0, alvo, alvo);
+      const r = window.jsQR(d.data, alvo, alvo, {inversionAttempts:"dontInvert"});
+      if (r && r.data) valor = r.data;
+    }
+    if (valor){
+      if (/^https?:\/\//i.test(valor)){
+        $("#scanner").classList.add("achou");
+        if (navigator.vibrate) navigator.vibrate(80);
+        $("#link").value = valor;
+        setTimeout(() => { fecharCamera(); definirLink(valor); }, 250);
+        clearInterval(scan.timer); scan.timer = null;
+      } else {
+        $("#scanDica").textContent = "Este QR code não é de nota fiscal. Aponte para o QR do cupom.";
+      }
+    }
+  } catch (e) {
+    // quadro ruim ou detector ocupado: tenta o próximo
+  } finally {
+    scan.ocupado = false;
+  }
+}
+
+function fecharCamera(){
+  if (scan.timer){ clearInterval(scan.timer); scan.timer = null; }
+  if (scan.stream){ scan.stream.getTracks().forEach((t) => t.stop()); }
+  scan.stream = scan.track = null; scan.lanterna = false;
+  const video = $("#video"); video.srcObject = null;
+  $("#lanterna").setAttribute("aria-pressed", "false");
+  $("#scanner").classList.add("hidden");
+  $("#scanAcoes").classList.remove("hidden");
+}
+
+async function alternarLanterna(){
+  if (!scan.track) return;
+  scan.lanterna = !scan.lanterna;
+  try {
+    await scan.track.applyConstraints({advanced:[{torch:scan.lanterna}]});
+    $("#lanterna").setAttribute("aria-pressed", String(scan.lanterna));
+    $("#lanterna").setAttribute("aria-label", scan.lanterna ? "Desligar lanterna" : "Ligar lanterna");
+  } catch (e) { scan.lanterna = false; $("#lanterna").classList.add("hidden"); }
+}
+
+/* ----------------------------------------------------------- estado */
+const CHAVE_STORE = "cestareal_teste_v1";
+let notas = [];
+let atual = null;
+function carregar(){ try { notas = JSON.parse(localStorage.getItem(CHAVE_STORE) || "[]"); } catch (e) { notas = []; } }
+function persistir(){ try { localStorage.setItem(CHAVE_STORE, JSON.stringify(notas)); } catch (e) {} }
+
+function mostrar(el, tipo, txt){ el.className = "msg show " + tipo; el.textContent = txt; }
+
+/* ------------------------------------------------------------ render */
+function porGrupo(itens){
+  const g = {nat:0, ing:0, proc:0, ultra:0, nc:0};
+  for (const i of itens) g[i.grupo] += i.total || 0;
+  return g;
+}
+function barra(el, itens, legendaEl){
+  const g = porGrupo(itens);
+  const tot = Object.values(g).reduce((a, b) => a + b, 0) || 1;
+  el.innerHTML = Object.entries(g).filter(([, v]) => v > 0)
+    .map(([k, v]) => `<i style="width:${(100 * v / tot).toFixed(2)}%;background:${GRUPOS[k].cor}" title="${esc(GRUPOS[k].nome)}"></i>`).join("");
+  if (legendaEl){
+    legendaEl.innerHTML = Object.entries(g).filter(([, v]) => v > 0)
+      .map(([k, v]) => `<span><i style="background:${GRUPOS[k].cor}"></i>${esc(GRUPOS[k].nome)} ${pct(v, tot)}</span>`).join("");
+  }
+}
+function kpi(rotulo, valor, cls = ""){ return `<div class="kpi"><span>${esc(rotulo)}</span><b class="${cls}">${esc(valor)}</b></div>`; }
+
+function renderNota(n){
+  $("#cardNota").classList.remove("hidden");
+  $("#notaTitulo").textContent = n.loja || "Nota lida";
+  $("#notaSub").textContent = [n.uf, n.emissao, n.cnpj && "CNPJ " + n.cnpj, n.leitor && "leitor: " + n.leitor].filter(Boolean).join(" · ");
+  const comGtin = n.itens.filter((i) => i.gtin).length;
+  const nc = n.itens.filter((i) => i.grupo === "nc").length;
+  let conf = "sem total", cls = "warn";
+  if (n.total != null){
+    const dif = n.total - n.soma;
+    if (Math.abs(dif) <= 0.05){ conf = "confere"; cls = "good"; }
+    else { conf = "dif. " + brl(dif); cls = Math.abs(dif) / (n.total || 1) < 0.03 ? "warn" : "bad"; }
+  }
+  $("#notaKpis").innerHTML =
+    kpi("Itens lidos", n.itens.length, n.itens.length ? "good" : "bad") +
+    kpi("Total da nota", brl(n.total)) +
+    kpi("Soma × total", conf, cls) +
+    kpi("Com GTIN", pct(comGtin, n.itens.length), comGtin / (n.itens.length || 1) >= .6 ? "good" : "warn");
+  $("#classAviso").textContent = `(classificação preliminar por palavras-chave · ${nc} sem classificação)`;
+  barra($("#notaBar"), n.itens, $("#notaLegend"));
+  $("#notaItens").innerHTML = n.itens.map((i) => `<tr>
+    <td>${esc(i.descricao)}</td>
+    <td>${i.gtin ? `<span class="chip gtin">GTIN ${esc(i.gtin)}</span>` : esc(i.codigo || "—")}</td>
+    <td class="num">${num(i.qtd)} ${esc(i.un || "")}</td>
+    <td class="num">${brl(i.unit)}</td>
+    <td class="num">${brl(i.total)}</td>
+    <td><span class="chip ${i.grupo}">${esc(GRUPOS[i.grupo].nome)}</span></td></tr>`).join("")
+    || `<tr><td colspan="6">Nenhum item reconhecido.</td></tr>`;
+  $("#salvarNota").disabled = !n.itens.length;
+  $("#cardNota").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function metricas(){
+  const itens = notas.flatMap((n) => n.itens);
+  const comTotal = notas.filter((n) => n.total != null);
+  const conferem = comTotal.filter((n) => Math.abs(n.total - n.soma) <= 0.05).length;
+  return {
+    notas: notas.length, itens: itens.length,
+    gtin: itens.filter((i) => i.gtin).length,
+    nc: itens.filter((i) => i.grupo === "nc").length,
+    comTotal: comTotal.length, conferem, todos: itens,
+    porUf: notas.reduce((a, n) => (a[n.uf || "?"] = (a[n.uf || "?"] || 0) + 1, a), {}),
+    porLeitor: notas.reduce((a, n) => (a[n.leitor || "?"] = (a[n.leitor || "?"] || 0) + 1, a), {}),
+  };
+}
+
+function renderTeste(){
+  const m = metricas();
+  $("#contador").textContent = m.notas + (m.notas === 1 ? " nota no teste" : " notas no teste");
+  $("#testeKpis").innerHTML =
+    kpi("Notas salvas", m.notas) +
+    kpi("Itens", m.itens) +
+    kpi("Com GTIN", pct(m.gtin, m.itens), m.itens && m.gtin / m.itens >= .6 ? "good" : "warn") +
+    kpi("Total confere", m.comTotal ? `${m.conferem} de ${m.comTotal}` : "—", m.comTotal && m.conferem === m.comTotal ? "good" : "warn");
+  $("#testeBarBox").classList.toggle("hidden", !m.itens);
+  if (m.itens) barra($("#testeBar"), m.todos);
+  $("#listaNotas").innerHTML = notas.length ? notas.map((n, i) => `
+    <div class="nota"><div><b>${esc(n.loja || "Nota sem nome")}</b>
+    <small>${esc([n.uf, n.emissao, n.itens.length + " itens", brl(n.total)].filter(Boolean).join(" · "))}</small></div>
+    <button class="icon-btn" type="button" data-rm="${i}" aria-label="Remover nota ${esc(n.loja || i + 1)}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+    </button></div>`).join("") : `<p class="hint">Nenhuma nota salva ainda. Leia a primeira nota acima.</p>`;
+}
+
+/* ----------------------------------------------------------- exportar */
+async function baixar(nome, conteudo, tipo){
+  const blob = new Blob([conteudo], {type:tipo});
+  if (EMBUTIDA && window.claude && window.claude.use){
+    const dl = await window.claude.use("downloads");
+    if (dl){
+      try { await dl.save({filename:nome, data:blob}); }
+      catch (e) {
+        if (e && e.code !== "declined") mostrar($("#msgItens"), "warn", "Não foi possível salvar o arquivo aqui. Abra o arquivo HTML no navegador para exportar.");
+      }
+      return;
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const dec = (v) => v == null ? "" : String(v).replace(".", ",");
+const csvCampo = (v) => { const s = String(v ?? ""); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+
+function exportarCsv(){
+  const cab = ["chave","uf","loja","emissao","descricao","codigo","gtin","quantidade","unidade","valor_unitario","valor_total","grupo_preliminar"];
+  const linhas = notas.flatMap((n) => n.itens.map((i) => [n.chave, n.uf, n.loja, n.emissao, i.descricao, i.codigo, i.gtin, dec(i.qtd), i.un, dec(i.unit), dec(i.total), GRUPOS[i.grupo].nome]));
+  baixar("cesta_real_itens.csv", "﻿" + [cab, ...linhas].map((l) => l.map(csvCampo).join(";")).join("\n"), "text/csv;charset=utf-8");
+}
+function exportarTxt(){
+  const m = metricas();
+  const g = porGrupo(m.todos), tot = Object.values(g).reduce((a, b) => a + b, 0);
+  const l = [
+    "RELATÓRIO DO TESTE DE CAPTURA — CESTA REAL",
+    "Gerado em " + new Date().toLocaleString("pt-BR"),
+    "=".repeat(46),
+    `Notas no teste ............ ${m.notas}  (por UF: ${Object.entries(m.porUf).map(([k, v]) => k + " " + v).join(", ")})`,
+    `Itens extraídos ........... ${m.itens}`,
+    `Itens com GTIN válido ..... ${m.gtin}  (${pct(m.gtin, m.itens)})`,
+    `Soma dos itens = total .... ${m.conferem} de ${m.comTotal} notas com total`,
+    `Itens não classificados ... ${m.nc}  (${pct(m.nc, m.itens)})`,
+    `Leitor usado .............. ${Object.entries(m.porLeitor).map(([k, v]) => k + ": " + v).join(", ")}`,
+    "",
+    "Gasto por grupo (classificação preliminar):",
+    ...Object.entries(g).filter(([, v]) => v > 0).map(([k, v]) => `  ${GRUPOS[k].nome.padEnd(30, ".")} ${pct(v, tot)}  (${brl(v)})`),
+    "",
+    "Notas:",
+    ...notas.map((n) => `  - ${n.loja || "sem nome"} | ${n.uf || "?"} | ${n.emissao || "?"} | ${n.itens.length} itens | total ${brl(n.total)} | soma ${brl(n.soma)} | ${n.leitor}`),
+  ];
+  baixar("cesta_real_relatorio.txt", l.join("\n"), "text/plain;charset=utf-8");
+}
+
+/* ------------------------------------------------------------ eventos */
+$("#foto").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  mostrar($("#msgQR"), "ok", "Lendo o QR code…");
+  try {
+    const link = await decodificarFoto(f);
+    if (link) { $("#link").value = link; definirLink(link); }
+    else mostrar($("#msgQR"), "warn", "Não consegui ler o QR. Tente outra foto, mais perto, com boa luz e o código inteiro no quadro.");
+  } catch (err) { mostrar($("#msgQR"), "err", "Erro ao ler a foto: " + err.message); }
+});
+$("#abrirCamera").addEventListener("click", abrirCamera);
+$("#fecharCamera").addEventListener("click", fecharCamera);
+$("#lanterna").addEventListener("click", alternarLanterna);
+document.addEventListener("visibilitychange", () => { if (document.hidden && scan.stream) fecharCamera(); });
+$("#usarLink").addEventListener("click", () => definirLink($("#link").value));
+$("#link").addEventListener("keydown", (e) => { if (e.key === "Enter") definirLink($("#link").value); });
+
+function aposLeitura(n){
+  const msg = $("#msgItens");
+  if (!n.itens.length){
+    mostrar(msg, "warn", "Conteúdo recebido, mas nenhum item reconhecido. Exporte o relatório e me envie o texto ou o arquivo da página para eu ajustar o leitor.");
+    $("#cardNota").classList.add("hidden");
+    return;
+  }
+  atual = n;
+  mostrar(msg, "ok", `${n.itens.length} itens lidos. Confira no passo 3 e salve no teste.`);
+  renderNota(n);
+}
+$("#lerTexto").addEventListener("click", () => {
+  const t = $("#texto").value;
+  if (!t.trim()) { mostrar($("#msgItens"), "warn", "Cole primeiro o conteúdo da página da nota."); return; }
+  const n = /<\s*(html|table|body|div)\b/i.test(t) ? lerHtml(t, "texto colado (HTML)") : lerTexto(t, "texto colado");
+  $("#texto").value = "";
+  aposLeitura(n);
+});
+$("#arquivos").addEventListener("change", async (e) => {
+  const fs = [...e.target.files]; e.target.value = "";
+  if (!fs.length) return;
+  if (fs.length === 1){
+    const t = await fs[0].text();
+    aposLeitura(/\.txt$/i.test(fs[0].name) ? lerTexto(t, fs[0].name) : lerHtml(t, fs[0].name));
+    return;
+  }
+  let ok = 0, falhas = [];
+  for (const f of fs){
+    const t = await f.text();
+    const n = /\.txt$/i.test(f.name) ? lerTexto(t, f.name) : lerHtml(t, f.name);
+    if (n.itens.length && !(n.chave && notas.some((x) => x.chave === n.chave))) { notas.push(n); ok++; }
+    else if (!n.itens.length) falhas.push(f.name);
+  }
+  persistir(); renderTeste();
+  mostrar($("#msgItens"), falhas.length ? "warn" : "ok",
+    `${ok} nota(s) salvas no teste.` + (falhas.length ? ` Sem itens reconhecidos: ${falhas.join(", ")}.` : ""));
+});
+$("#salvarNota").addEventListener("click", () => {
+  if (!atual) return;
+  if (atual.chave && notas.some((x) => x.chave === atual.chave)){
+    mostrar($("#msgItens"), "warn", "Esta nota já está no teste.");
+  } else {
+    notas.push(atual); persistir(); renderTeste();
+    mostrar($("#msgItens"), "ok", "Nota salva. Leia a próxima no passo 1.");
+  }
+  atual = null;
+  qr.link = qr.chave = qr.uf = "";
+  $("#qrInfo").classList.remove("show"); $("#msgQR").className = "msg"; $("#link").value = "";
+  $("#cardNota").classList.add("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+$("#descartarNota").addEventListener("click", () => { atual = null; $("#cardNota").classList.add("hidden"); $("#msgItens").className = "msg"; });
+$("#listaNotas").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-rm]");
+  if (!b) return;
+  notas.splice(Number(b.dataset.rm), 1); persistir(); renderTeste();
+});
+$("#expCsv").addEventListener("click", () => notas.length ? exportarCsv() : mostrar($("#msgItens"), "warn", "Nenhuma nota salva para exportar."));
+$("#expTxt").addEventListener("click", () => notas.length ? exportarTxt() : mostrar($("#msgItens"), "warn", "Nenhuma nota salva para exportar."));
+$("#limpar").addEventListener("click", () => {
+  if (!notas.length) return;
+  if (confirm("Apagar todas as notas deste teste?")) { notas = []; persistir(); renderTeste(); }
+});
+
+carregar(); renderTeste();
+</script>
+</body>
+</html>
