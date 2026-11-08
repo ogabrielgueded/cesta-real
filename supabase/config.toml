@@ -1,0 +1,5 @@
+# Configuração da função de consulta de NFC-e (Supabase Edge Functions).
+# A página de teste chama a função sem login; a proteção vem da lista de
+# origens e da restrição a endereços de SEFAZ dentro do próprio código.
+[functions.consulta-nfce]
+verify_jwt = false
