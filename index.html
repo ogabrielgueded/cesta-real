@@ -909,14 +909,32 @@ if (new URLSearchParams(location.search).has("colar")){
 }
 $("#colarAtalho").addEventListener("click", async () => {
   const msg = $("#msgAtalho");
-  let t = "";
-  try { t = await navigator.clipboard.readText(); }
-  catch (e) {
-    mostrar(msg, "warn", "Não consegui ler a área de transferência. Segure o dedo no campo do passo 2 e toque em “Colar”.");
-    $("#texto").focus();
+  let t = "", tipos = [];
+  // 1º: lê todos os formatos (o atalho pode copiar como texto formatado/HTML)
+  try {
+    if (navigator.clipboard.read){
+      const itens = await navigator.clipboard.read();
+      for (const it of itens){
+        tipos.push(...it.types);
+        for (const tipo of ["text/html", "text/plain"]){
+          if (!t && it.types.includes(tipo)) t = await (await it.getType(tipo)).text();
+        }
+      }
+    }
+  } catch (e) { /* tenta o modo simples abaixo */ }
+  // 2º: só texto simples
+  if (!t || !t.trim()){
+    try { t = await navigator.clipboard.readText(); }
+    catch (e) {
+      mostrar(msg, "warn", "Não consegui ler a área de transferência. Segure o dedo no campo do passo 2 e toque em “Colar”.");
+      $("#texto").focus();
+      return;
+    }
+  }
+  if (!t || !t.trim()){
+    mostrar(msg, "warn", "A área de transferência chegou vazia" + (tipos.length ? " (formatos: " + tipos.join(", ") + ")" : "") + ". Rode o atalho de novo na página da nota, depois de tocar em “Visualizar”, e me mande um print desta mensagem.");
     return;
   }
-  if (!t || !t.trim()){ mostrar(msg, "warn", "A área de transferência está vazia. Rode o atalho de novo na página da nota, depois de tocar em “Visualizar”."); return; }
   const n = /<\s*(html|table|body|div)\b/i.test(t) ? lerHtml(t, "atalho do iPhone") : lerTexto(t, "atalho do iPhone");
   if (!n.itens.length && /cf-turnstile|g-recaptcha/i.test(t)){
     mostrar(msg, "warn", "O atalho rodou antes de os itens aparecerem. Na página da SEFAZ, faça a verificação, toque em “Visualizar” e só então rode o atalho.");
